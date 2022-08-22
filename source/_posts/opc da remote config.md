@@ -1,5 +1,5 @@
 title: OPC DA局域网远程连接精简配置实践
-tags: [opc,工控]
+tags: [opc,工控,DCOM]
 categories: [工控]
 date: 2022-08-22 14:24:00
 ---
@@ -55,3 +55,8 @@ opc da局域网远程连接的配置进行过许多次，由于DCOM配置本身�
 
 ### 2. 访问服务端
 - 登录该`OPCUser`用户，即可在该电脑上访问服务端电脑上的OPC DA服务
+
+## 后记
+
+本文参照了Kepware官方的详细配置文档，该文档步骤不可谓不繁琐，但还是具有参考意义的，为方便大家阅读，我已翻译此文档，有兴趣的转我的幕布文章 [远程OPC DA快速上手指南（DCOM）（kepware官方文档直译）](https://www.mubucm.com/doc/4s3Knbv1FTw) 自行阅读吧。
+**官方原文档可上kepware官网下载：[点此下载](https://www.kepware.com/getattachment/04042e47-c690-467c-a931-a1ca126575db/Remote-OPC-DA-Quick-Start-Guide-DCOM.pdf)**
