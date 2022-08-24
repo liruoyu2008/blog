@@ -3,7 +3,7 @@ tags: [网站,前端]
 categories: [学习]
 date: 2022-08-17 15:57:00
 ---
-欢迎来到 [Hexo](https://hexo.io/zh-cn/)！这是你的第一个帖子。通过 [Hexo文档](https://hexo.io/zh-cn/docs/) 可以获得更多信息。如果你在使用过程中碰到了问题，可以在 [问题解答](https://hexo.io/zh-cn/docs/troubleshooting.html) 寻找答案，也可以直接在Hexo的 [GitHub](https://github.com/hexojs/hexo/issues) 询问。
+    欢迎来到 [Hexo](https://hexo.io/zh-cn/)！这是你的第一个帖子。通过 [Hexo文档](https://hexo.io/zh-cn/docs/) 可以获得更多信息。如果你在使用过程中碰到了问题，可以在 [问题解答](https://hexo.io/zh-cn/docs/troubleshooting.html) 寻找答案，也可以直接在Hexo的 [GitHub](https://github.com/hexojs/hexo/issues) 询问。
 
 <!--more-->
 
