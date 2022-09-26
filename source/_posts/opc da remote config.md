@@ -27,7 +27,7 @@ opc da局域网远程连接的配置进行过许多次，由于DCOM配置本身�
   - 右键`属性`，并切换到`COM安全`选项卡
   - 在`访问权限`中，点击`编辑限制`
   - 添加`OPCGroup`用户组，并赋予全部权限如下：
-  ![图 3](https://api.onedrive.com/v1.0/shares/s!AuARQ03xNIEnyw6sp5rBCIfZlJjd/root/content))
+  ![图 3](https://api.onedrive.com/v1.0/shares/s!AuARQ03xNIEnyw6sp5rBCIfZlJjd/root/content)
   - 在`启动和激活权限`中，也作类似配置
 - OPCEnum配置
   - 在`组件服务`|`计算机`|`我的电脑`|`DCOM配置`中，找到`OPCEnum`
