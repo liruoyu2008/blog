@@ -22,24 +22,31 @@ opc da局域网远程连接的配置进行过许多次，由于DCOM配置本身�
 ### 2. DCOM配置
 
 - 在`运行`中键入命令`dcomcnfg`打开组件服务，进行如下配置：
+- 我的电脑配置
+  - 在`组件服务`|`计算机`|`我的电脑`
+  - 右键`属性`，并切换到`COM安全`选项卡
+  - 在`访问权限`中，点击`编辑限制`
+  - 添加`OPCGroup`用户组，并赋予全部权限如下：
+  ![图 3](https://api.onedrive.com/v1.0/shares/s!AuARQ03xNIEnyw6sp5rBCIfZlJjd/root/content))
+  - 在`启动和激活权限`中，也作类似配置
 - OPCEnum配置
   - 在`组件服务`|`计算机`|`我的电脑`|`DCOM配置`中，找到`OPCEnum`
   - 右键`属性`，并切换到`安全`选项卡
   - 在`启动与激活权限`中，选择`自定义`，并点击`编辑`
   - 添加`OPCGroup`用户组，并赋予全部权限如下：
-  ![图 3](https://api.onedrive.com/v1.0/shares/s!AuARQ03xNIEnywoAWawqrevi7f68/root/content)
-  - 在访问权限中，也作类似配置
--  OPC DA服务运行时配置（以开普华Kepsware的opc da为例）
+  ![图 4](https://api.onedrive.com/v1.0/shares/s!AuARQ03xNIEnywoAWawqrevi7f68/root/content)
+  - 在`访问权限`中，也作类似配置
+- OPC服务运行时配置（此处仅以kepware.KEPServerEX.V6为例）
   - 在`组件服务`|`计算机`|`我的电脑`|`DCOM配置`中，找到`KEPSErverEX 6.5`
   - 右键`属性`，并切换到`安全`选项卡
   - 在`启动与激活权限`中，选择`自定义`，并点击`编辑`
   - 添加`OPCGroup`用户组，并赋予全部权限如下：
-  ![图 4](https://api.onedrive.com/v1.0/shares/s!AuARQ03xNIEnywsNy-rqmLq6KD4U/root/content)
+  ![图 5](https://api.onedrive.com/v1.0/shares/s!AuARQ03xNIEnywsNy-rqmLq6KD4U/root/content)
   - 在`访问权限`中，也作类似配置
 
 ### 3. 防火墙设置
 - 在`运行`中键入命令`firewall.cpl`打开防火墙控制面板，进入`高级设置`
-![图 5](https://api.onedrive.com/v1.0/shares/s!AuARQ03xNIEnywyfPGvaNJWg12Aj/root/content)
+![图 6](https://api.onedrive.com/v1.0/shares/s!AuARQ03xNIEnywyfPGvaNJWg12Aj/root/content)
 - 在`入站规则`上右键`新建规则`，新建一个`端口规则`，开放`135`端口访问权限；
 - 在`入站规则`上右键`新建规则`，新建一个`程序规则`，开放`C:\Windows\SysWow64\opcenum`访问权限；
 - 在`入站规则`上右键`新建规则`，新建一个`程序规则`，开放`C:\Program Files (x86)\Kepware\KEPServerEX 6\server_runtime.exe`OPC DA服务运行时访问权限；
@@ -50,10 +57,10 @@ opc da局域网远程连接的配置进行过许多次，由于DCOM配置本身�
 ### 1.添加专用用户
 - 在`运行`中键入命令`lusrmgr.msc`打开`本地用户和组`
 - 在用户中新建一个用户`OPCUser`，输入与上面所创建的用户相同的用户名和密码，并作如下设置：
-![图 6](https://api.onedrive.com/v1.0/shares/s!AuARQ03xNIEnyw3rWyW8cV0zOY2c/root/content)
+![图 7](https://api.onedrive.com/v1.0/shares/s!AuARQ03xNIEnyw3rWyW8cV0zOY2c/root/content)
 
 ### 2. 访问服务端
-- 登录该`OPCUser`用户，即可在该电脑上访问服务端电脑上的OPC DA服务
+- 登录该`OPCUser`用户，即可在该电脑上访问服务端电脑上的OPC DA服务。(若无法访问，可重启服务器上的opc服务后，稍等几秒再尝试。或给我留言、发邮件，描述清楚问题，我会抽空回复。)
 
 ## 后记
 
