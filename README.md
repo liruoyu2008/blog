@@ -10,7 +10,7 @@ git pull git@github.com:liruoyu2008/blog.git
 2. 进入
 
 ```bash
-cd ~/blog
+cd ~/blog 
 ```
 
 3. 安装nodejs
