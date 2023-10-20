@@ -21,31 +21,35 @@
     var CONFIG = {"hostname":"liruoyu2008.github.io","root":"/blog/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="行至水穷处，坐看云起时">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Code for Love">
-<meta property="og:url" content="https://liruoyu2008.github.io/blog/index.html">
+  <meta name="description" content="今天来回顾下P&#x2F;Invoke中的各种细节，加深下理解和记忆。 概念P&#x2F;Invoke，全名Platform Invocation Services，是.NET框架中的一个特性。允许托管代码（比如C#，VB等.NET语言编写的代码）调用非托管的DLL函数，包括Win32 API库和其它我们自己编写的C&#x2F;C++动态链接库中的函数。 P&#x2F;Invoke的名字就来自“P">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深刻理解C#中的协变与逆变">
+<meta property="og:url" content="https://liruoyu2008.github.io/blog/2023/10/20/PInvoke/index.html">
 <meta property="og:site_name" content="Code for Love">
-<meta property="og:description" content="行至水穷处，坐看云起时">
+<meta property="og:description" content="今天来回顾下P&#x2F;Invoke中的各种细节，加深下理解和记忆。 概念P&#x2F;Invoke，全名Platform Invocation Services，是.NET框架中的一个特性。允许托管代码（比如C#，VB等.NET语言编写的代码）调用非托管的DLL函数，包括Win32 API库和其它我们自己编写的C&#x2F;C++动态链接库中的函数。 P&#x2F;Invoke的名字就来自“P">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-10-20T10:49:00.000Z">
+<meta property="article:modified_time" content="2023-10-20T07:04:59.507Z">
 <meta property="article:author" content="Ryu">
-<meta property="article:tag" content="程序员,理想,游戏,诗">
+<meta property="article:tag" content="C#">
+<meta property="article:tag" content=".Net">
+<meta property="article:tag" content="dotnet">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://liruoyu2008.github.io/blog/">
+<link rel="canonical" href="https://liruoyu2008.github.io/blog/2023/10/20/PInvoke/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>Code for Love</title>
+  <title>深刻理解C#中的协变与逆变 | Code for Love</title>
   
 
 
@@ -144,9 +148,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -162,10 +167,9 @@
       <meta itemprop="name" content="Code for Love">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/2023/10/20/PInvoke/" class="post-title-link" itemprop="url">深刻理解C#中的协变与逆变</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          深刻理解C#中的协变与逆变
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -219,7 +223,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>今天来回顾下P&#x2F;Invoke中的各种细节，加深下理解和记忆。</p>
+        <p>今天来回顾下P&#x2F;Invoke中的各种细节，加深下理解和记忆。</p>
 <h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>P&#x2F;Invoke，全名Platform Invocation Services，是.NET框架中的一个特性。允许托管代码（比如C#，VB等.NET语言编写的代码）调用非托管的DLL函数，包括Win32 API库和其它我们自己编写的C&#x2F;C++动态链接库中的函数。</p>
 <p>P&#x2F;Invoke的名字就来自“Platform Invocation”，意思是调用平台函数，通常是调用C&#x2F;C++的本地函数库。</p>
 <p>在C#中，我们使用[DllImport]特性来导入DLL，然后声明对应的<strong>静态方法</strong>就可以使用了。例如调用windows api中的一个函数MessageBox，我们可以这样声明：</p>
@@ -227,346 +231,109 @@
 
 <p>然后我们就可以像普通C#函数一样来使用MessageBox了：</p>
 <figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MessageBox(<span class="keyword">new</span> IntPtr(<span class="number">0</span>), <span class="string">&quot;Hello World!&quot;</span>, <span class="string">&quot;Hello Dialog&quot;</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/blog/2023/10/20/PInvoke/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
+
+<span id="more"></span>
+
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>一句话：</p>
+<p><strong>主流高级编程语言实际上并不互相支持或兼容，但他们的共同点在于都支持C。以C为桥梁（或胶水），各语言之间可以实现一定程度的互通。</strong></p>
+<p>高级编程语言大都有各自的特性以及存储管理方式等，各语言之间的差异决定了不可能支持互相直接的或进行复杂的互操作。但大部分主流编程语言都有办法与C语言互动，这主要是因为C语言的普遍性和效率，以及它在操作系统和硬件级别的广泛应用。以下是一些主流语言如何与C语言交互的概览：</p>
+<ol start="0">
+<li><p>C++：完全兼容C。</p>
+</li>
+<li><p>C#：使用P&#x2F;Invoke或者C++&#x2F;CLI来调用C的函数库。</p>
+</li>
+<li><p>Java：使用Java Native Interface (JNI)来调用C和C++的代码。</p>
+</li>
+<li><p>Python：可以使用ctypes或cffi库来调用C的DLL，或者使用Cython、SWIG等工具将C代码包装成Python模块。</p>
+</li>
+<li><p>Go：使用cgo可以在Go代码中直接调用C的函数。</p>
+</li>
+<li><p>Rust：Rust可以使用其Foreign Function Interface (FFI)来调用C的函数。</p>
+</li>
+<li><p>Ruby：Ruby C扩展允许你在Ruby程序中调用C的函数。</p>
+</li>
+<li><p>JavaScript：在Node.js环境中，可以使用Node Foreign Function Interface (node-ffi)来调用C的函数库。在前端环境，WebAssembly技术可以让前端运行C和C++编译出来的代码。</p>
+</li>
+</ol>
+<p>C#通过unsafe代码可以直接操作非托管代码（包括指针等资源）。而我们经常将C&#x2F;C++放在一起说，是因为C++完全兼容C，是C的一个超集。从面向对象的角度讲：</p>
+<p><strong>C是接口，则C++完全实现了C。若需要使用一个C资源，给我一个C++资源我也一样可以使用。</strong></p>
+<p>正是因为这个原因，C#完成了与C++库的互操作。所以我们说C#支持与C&#x2F;C++的互操作。</p>
+<h3 id="声明"><a href="#声明" class="headerlink" title="声明"></a>声明</h3><p>我们知道，C语言中提供给外部掉调用的方法是这么声明的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="type">void</span> <span class="title function_">myFunction</span><span class="params">()</span>;</span><br></pre></td></tr></table></figure>
+
+<p>C语言的声明简洁明了：<code>extern</code>关键字表示该方法可以被其他源文件或库调用，后面紧跟的就是方法签名了。</p>
+<p>再看看C++是怎么声明的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> __declspec(dllexport) <span class="function"><span class="type">void</span> __stdcall <span class="title">myFunction</span><span class="params">()</span>；</span></span><br></pre></td></tr></table></figure>
+
+<p>多了三个部分：</p>
+<ol>
+<li>“C”：可选值为”C”和”C++”，分别表示以两种不同的方式编译链接该方法。由于C++的导出方式会重命名该方法从而导致调用方找不到该方法，因此对于P&#x2F;Invoke，这里只能写”C”；</li>
+<li>__declspec(dllexport)：双下划线表示该关键字是编译器相关的关键字，全称：declaration specification，声明规范。其参数可为：<ul>
+<li><code>dllexport</code>：将后续的声明的函数或变量导出，被其它DLL或程序所引用；</li>
+<li><code>dllimport</code>：在编译时指定链接器从另一个DLL中获取函数或变量；</li>
+<li><code>noinline</code>：阻止编译器对指定的函数进行内联优化；</li>
+<li><code>thread</code>：将变量声明为线程局部存储（Thread Local Storage，简称TLS），即每个线程一份存储副本；</li>
+<li><code>deprecated</code>：标记函数或类型为过时，如果它们被使用，编译器将发出警告。</li>
+</ul>
+</li>
+<li>__stdcall：双下划线表示该关键字是编译器相关的关键字，这个参数的另一个可选值为<code>__cdelc</code>，也可留空（根据平台不同会默认指定为其中一个，一般为后者）。<ul>
+<li><code>__cdecl</code>：推荐方式。这种方式最大的特点在于<strong>参数由调用者清除</strong>。或者换个说法，如果希望兼容各种C代码，希望API参数更加灵活多变（譬如printf函数），就选它；</li>
+<li><code>__stacall</code>：这种方式最大的特点在于<strong>参数由被调用者清除</strong>。Win32 API通常都是使用这种方式，因此，如果你的API大量调用了Win32 API，或者是由VC++编写的（通常就肯定与Win32 API有关），就选它。</li>
+</ul>
+</li>
+</ol>
+<h3 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h3><p>由于P&#x2F;Invoke实质上是对C接口的兼容，因此不需要考虑C++的复杂类型或特性。</p>
+<p>除了双方对基元类型的兼容外，需要着重了解下结构体类型和字符（串）类型的传递。</p>
+<h4 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h4><p>若传入参数为结构体，则在C#中需要定义对应的结构体，并且需要使用结构体特性[StructLayout.Sequential]进行标注，告诉编译器该结构体各字段应顺序存储以保持与C结构体的一致性。</p>
+<p>此外，如果传入参数为联合体Union类型，也可通过定义结构体并对结构体和其属性分别使用特性[StructLayout.Explicit]和[FieldOffset(0)]来达到目的。</p>
+<h4 id="字符数据"><a href="#字符数据" class="headerlink" title="字符数据"></a>字符数据</h4><p>关于字符数据，有一点需要了解：</p>
+<p><strong>C#中的char和string类型实际上是使用utf-16进行编码存储的，而C&#x2F;C++中的char是采用ASCII编码进行存储的。</strong></p>
+<p>了解了这一点，就应该知道，在需要传递char、char*数据的地方，我们理论上应该传入的是byte和byte数组的首地址，而不应该直接传递C#中的char和string。当然，如果你能够做到融汇贯通，那么你将CharSet设置为ANSI，并传入一个C#的string，也一样是可以的：</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="meta">DllImport(<span class="string">&quot;user32.dll&quot;</span>,  CharSet = CharSet.ANSI)</span>]</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">extern</span> <span class="built_in">int</span> <span class="title">MessageBox</span>(<span class="params">IntPtr hWnd, <span class="built_in">char</span>* text, String caption, <span class="built_in">uint</span> type</span>)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>既然C#中的char和string不能直接对应C&#x2F;C++中的char和char*，那应该对应什么呢？通常情况下，答案是<code>wchar_t</code>。</p>
+<p><code>wchar_t</code>是C和C++的基础数据类型之一，表示宽体字符类型，每个字符占用2个字节（某些系统可能为4个字节），并采用utf-16（某些系统可能采用utf-32）进行编解码。因此，如果需要传递的参数为wchar_t或wchar_t*，则可以直接将C#的char或string传递过去。</p>
+<p>记住，无论在哪种语言中：</p>
+<p><strong>字符或字符串都是以一个或一串字节数据的形式存储的，其本质是一样的，不同编程语言或不同命名方式相当于对这些字节数据采用了不同的解码方式而已。</strong></p>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>自从跨平台的.net core问世之后，C++&#x2F;CLI这种无法跨平台的托管C++已经逐渐式微，VS2022的C++默认安装已经不提供其项目或库的模板了，而且，C++&#x2F;CLI的设计初衷是为了使C++编码人员无痛转入.Net阵营，而对于对于我等.Net原著名，目前来说，P&#x2F;Invoke这种历久弥坚的老技术再次成为了事实上的最优解。实际上，P&#x2F;Invoke中还存在很多细节，有我知道但不便继续赘述的，也有我目前还不了解的。欢迎大家留言或提问，一起学习一起成长吧~</p>
+
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://liruoyu2008.github.io/blog/2023/10/19/%E5%8D%8F%E5%8F%98%E4%B8%8E%E9%80%86%E5%8F%98/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/blog/images/avatar.png">
-      <meta itemprop="name" content="Ryu">
-      <meta itemprop="description" content="行至水穷处，坐看云起时">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Code for Love">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
           
-            <a href="/blog/2023/10/19/%E5%8D%8F%E5%8F%98%E4%B8%8E%E9%80%86%E5%8F%98/" class="post-title-link" itemprop="url">深刻理解C#中的协变与逆变</a>
-        </h2>
+          <div class="post-tags">
+              <a href="/blog/tags/C/" rel="tag"><i class="fa fa-tag"></i> C#</a>
+              <a href="/blog/tags/Net/" rel="tag"><i class="fa fa-tag"></i> .Net</a>
+              <a href="/blog/tags/dotnet/" rel="tag"><i class="fa fa-tag"></i> dotnet</a>
+          </div>
 
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-10-19 21:29:00" itemprop="dateCreated datePublished" datetime="2023-10-19T21:29:00+00:00">2023-10-19</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-10-20 07:04:59" itemprop="dateModified" datetime="2023-10-20T07:04:59+00:00">2023-10-20</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">学习</span></a>
-                </span>
-            </span>
-
-          
-            <span id="/blog/2023/10/19/%E5%8D%8F%E5%8F%98%E4%B8%8E%E9%80%86%E5%8F%98/" class="post-meta-item leancloud_visitors" data-flag-title="深刻理解C#中的协变与逆变" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="leancloud-visitors-count"></span>
-            </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/blog/2023/10/19/%E5%8D%8F%E5%8F%98%E4%B8%8E%E9%80%86%E5%8F%98/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/blog/2023/10/19/%E5%8D%8F%E5%8F%98%E4%B8%8E%E9%80%86%E5%8F%98/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>今日，让我们来探讨一下C#中协变、逆变、不变的编译器处理和内部逻辑上的差别，并对重点作出总结。力求能够深刻的理解协变、逆变的本质，并在实际工作中加以利用。</p>
-<h3 id="引入"><a href="#引入" class="headerlink" title="引入"></a>引入</h3><p>先看一个C#语句：</p>
-<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Person p = <span class="keyword">new</span> Student()</span><br></pre></td></tr></table></figure>
-
-<p>这个语句中，<code>Student</code>类是<code>Person</code>类的派生类，而这个赋值写法是遵循<strong>里氏替换原则</strong>的。之所以高级编程语言都支持这样的替换原则，本质上是因为这样一个基础逻辑：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">公理：一个派生类拥有其基类的所有资源（属性或方法等），因此任何需要使用基类（实际上就是使用这些资源）的地方，让其使用拥有同样甚至更多资源的派生类，是必然可行的。</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/blog/2023/10/19/%E5%8D%8F%E5%8F%98%E4%B8%8E%E9%80%86%E5%8F%98/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://liruoyu2008.github.io/blog/2022/08/22/opc%20da%20remote%20config/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/blog/images/avatar.png">
-      <meta itemprop="name" content="Ryu">
-      <meta itemprop="description" content="行至水穷处，坐看云起时">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Code for Love">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/2022/08/22/opc%20da%20remote%20config/" class="post-title-link" itemprop="url">OPC DA局域网远程连接精简配置实践</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-08-22 14:24:00" itemprop="dateCreated datePublished" datetime="2022-08-22T14:24:00+00:00">2022-08-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-10-20 07:04:59" itemprop="dateModified" datetime="2023-10-20T07:04:59+00:00">2023-10-20</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/%E5%B7%A5%E6%8E%A7/" itemprop="url" rel="index"><span itemprop="name">工控</span></a>
-                </span>
-            </span>
-
-          
-            <span id="/blog/2022/08/22/opc%20da%20remote%20config/" class="post-meta-item leancloud_visitors" data-flag-title="OPC DA局域网远程连接精简配置实践" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="leancloud-visitors-count"></span>
-            </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/blog/2022/08/22/opc%20da%20remote%20config/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/blog/2022/08/22/opc%20da%20remote%20config/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>opc da局域网远程连接的配置进行过许多次，由于DCOM配置本身相对偏僻，前后使用的Windows开发与调试环境也不尽相同，所以每次都是参照教程摸索着走，以至于成不成功全看天意，且很多教程是需要关防火墙的，多少会影响到服务端的安全策略。最近刚好项目需要，遂于午后与吾友<code>@bool</code>使用两台机器一一尝试总结，得出一套精简方案，帮助广大工控人以尽量少的设置来完成opc da局域网通讯。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/blog/2022/08/22/opc%20da%20remote%20config/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/blog/2023/10/19/%E5%8D%8F%E5%8F%98%E4%B8%8E%E9%80%86%E5%8F%98/" rel="prev" title="深刻理解C#中的协变与逆变">
+      <i class="fa fa-chevron-left"></i> 深刻理解C#中的协变与逆变
+    </a></div>
+      <div class="post-nav-item"></div>
     </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
+    
   </article>
   
   
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://liruoyu2008.github.io/blog/2022/08/17/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/blog/images/avatar.png">
-      <meta itemprop="name" content="Ryu">
-      <meta itemprop="description" content="行至水穷处，坐看云起时">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Code for Love">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/blog/2022/08/17/hello-world/" class="post-title-link" itemprop="url">Well Come to Hexo</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-08-17 15:57:00" itemprop="dateCreated datePublished" datetime="2022-08-17T15:57:00+00:00">2022-08-17</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-10-20 07:04:59" itemprop="dateModified" datetime="2023-10-20T07:04:59+00:00">2023-10-20</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/blog/categories/%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">学习</span></a>
-                </span>
-            </span>
-
-          
-            <span id="/blog/2022/08/17/hello-world/" class="post-meta-item leancloud_visitors" data-flag-title="Well Come to Hexo" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="leancloud-visitors-count"></span>
-            </span>
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/blog/2022/08/17/hello-world/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/blog/2022/08/17/hello-world/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>欢迎来到 <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/">Hexo</a>！这是你的第一个帖子。通过 <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">Hexo文档</a> 可以获得更多信息。如果你在使用过程中碰到了问题，可以在 <a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/troubleshooting.html">问题解答</a> 寻找答案，也可以直接在Hexo的 <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a> 询问。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/blog/2022/08/17/hello-world/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-
   
 
 
 
           </div>
           
+    <div class="comments" id="valine-comments"></div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -613,6 +380,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A3%B0%E6%98%8E"><span class="nav-number">3.</span> <span class="nav-text">声明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">4.1.</span> <span class="nav-text">结构体</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E6%95%B0%E6%8D%AE"><span class="nav-number">4.2.</span> <span class="nav-text">字符数据</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%90%8E"><span class="nav-number">5.</span> <span class="nav-text">最后</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
