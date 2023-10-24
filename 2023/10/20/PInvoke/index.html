@@ -29,7 +29,7 @@
 <meta property="og:description" content="今天来回顾下P&#x2F;Invoke中的各种细节，加深下理解和记忆。 概念P&#x2F;Invoke，全名Platform Invocation Services，是.NET框架中的一个特性。允许托管代码（比如C#，VB等.NET语言编写的代码）调用非托管的DLL函数，包括Win32 API库和其它我们自己编写的C&#x2F;C++动态链接库中的函数。 P&#x2F;Invoke的名字就来自“P">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-10-20T10:49:00.000Z">
-<meta property="article:modified_time" content="2023-10-20T14:34:07.220Z">
+<meta property="article:modified_time" content="2023-10-24T08:46:13.391Z">
 <meta property="article:author" content="Ryu">
 <meta property="article:tag" content="C#">
 <meta property="article:tag" content=".Net">
@@ -177,10 +177,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2023-10-20 10:49:00 / 修改时间：14:34:07" itemprop="dateCreated datePublished" datetime="2023-10-20T10:49:00+00:00">2023-10-20</time>
+              <time title="创建时间：2023-10-20 10:49:00" itemprop="dateCreated datePublished" datetime="2023-10-20T10:49:00+00:00">2023-10-20</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-10-24 08:46:13" itemprop="dateModified" datetime="2023-10-24T08:46:13+00:00">2023-10-24</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -277,13 +283,13 @@
 </ul>
 </li>
 <li>__stdcall：双下划线表示该关键字是编译器相关的关键字，这个参数的另一个可选值为<code>__cdelc</code>，也可留空（根据平台不同会默认指定为其中一个，一般为后者）。<ul>
-<li><code>__cdecl</code>：推荐方式。这种方式最大的特点在于<strong>参数由调用者清除</strong>。或者换个说法，如果希望兼容各种C代码，希望API参数更加灵活多变（譬如printf函数），就选它；</li>
-<li><code>__stdcall</code>：这种方式最大的特点在于<strong>参数由被调用者清除</strong>。Win32 API通常都是使用这种方式，因此，如果你的API大量调用了Win32 API，或者是由VC++编写的（通常就肯定与Win32 API有关），就选它。</li>
+<li><code>__cdecl</code>：这种方式最大的特点在于<strong>参数由调用者清除</strong>。如果不理解，那么当你使用C++编写库函数时，或者希望API参数更加灵活可变（譬如printf函数）时，就选它；</li>
+<li><code>__stacall</code>：这种方式最大的特点在于<strong>参数由被调用者清除</strong>。Win32 API通常都是使用这种方式，因此，如果你的API大量调用了Win32 API或者可能会被当作回调函数给Win32 API调用时，亦或者可能会被VB、Delphi等调用时（它们可能仅支持stdcall的方式），就选它。</li>
 </ul>
 </li>
 </ol>
 <h3 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h3><p>由于P&#x2F;Invoke实质上是对C接口的兼容，因此不需要考虑C++的复杂类型或特性。</p>
-<p>除了双方对基元类型的兼容外，需要着重了解下结构体类型和字符（串）类型的传递。</p>
+<p>除了双方对基元类型（bool类型除外）的兼容外，需要着重了解下结构体类型和字符（串）类型的传递。</p>
 <h4 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h4><p>若传入参数为结构体，则在C#中需要定义对应的结构体，并且需要使用结构体特性[StructLayout.Sequential]进行标注，告诉编译器该结构体各字段应顺序存储以保持与C结构体的一致性。</p>
 <p>此外，如果传入参数为联合体Union类型，也可通过定义结构体并对结构体和其属性分别使用特性[StructLayout.Explicit]和[FieldOffset(0)]来达到目的。</p>
 <h4 id="字符数据"><a href="#字符数据" class="headerlink" title="字符数据"></a>字符数据</h4><p>关于字符数据，有一点需要了解：</p>
@@ -295,7 +301,58 @@
 <p><code>wchar_t</code>是C和C++的基础数据类型之一，表示宽体字符类型，每个字符占用2个字节（某些系统可能为4个字节），并采用utf-16（某些系统可能采用utf-32）进行编解码。因此，如果需要传递的参数为wchar_t或wchar_t*，则可以直接将C#的char或string传递过去。</p>
 <p>记住，无论在哪种语言中：</p>
 <p><strong>字符或字符串都是以一个或一串字节数据的形式存储的，其本质是一样的，不同编程语言或不同命名方式相当于对这些字节数据采用了不同的解码方式而已。</strong></p>
-<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>自从跨平台的.net core问世之后，C++&#x2F;CLI这种无法跨平台的托管C++日渐式微，VS2022的C++默认安装已经不提供其项目或库的模板了，而且，C++&#x2F;CLI的设计初衷是为了使C++编码人员无痛转入.Net阵营，而对于对于我等.Net原住民，目前来说，P&#x2F;Invoke这种历久弥坚的老技术再次成为了事实上的最优解。实际上，P&#x2F;Invoke中还存在很多细节，有我知道但不便继续赘述的，也有我目前还不了解的。欢迎大家留言或提问，一起学习一起成长吧~</p>
+<p><strong>注意</strong>，由于C#的对常量字符串静态存储的特殊处理，所以对于字符串的传入与传出需要格外注意两点：</p>
+<ul>
+<li>传入：使用适当的编码方式时，C#内可以直接定义<code>string str</code>这样的形参传入到C++，C#会自动将该字符串封送一份副本到非托管内存而不是像其他引用类型（如<code>ref int x</code>）那用直接传递原始字符串的地址，所以在C++内修改该字符串实际上也只是修改了副本，托管堆内的原始<code>string</code>依然没有变化。若真的希望修改托管堆内的内容，可以传递<code>StringBuilder</code>，C#的<code>StringBuilder</code>更加类似C++内字符指针的形态（注意：要为<code>Stringbuilder</code>分配足够容纳修改后内容的空间）。</li>
+<li>传出：无论何时，接收C++传出的字符串都不能用<code>string</code>。一般正确的做法是用形如<code>IntPtr</code>这样的指针形式，然后通过<code>MarShal</code>的静态方法去读取字符串。</li>
+</ul>
+<h3 id="封送规则"><a href="#封送规则" class="headerlink" title="封送规则"></a>封送规则</h3><p>一般情况下，我们需要考虑的数据封送情况分为三种：基元类型、字符类型、结构体类型；基元类型两边基本都是一致的，可以直接传递；字符类型分为Ansi和Unicode，通过通过指定<strong>方法级别</strong>的**[CharSet]**特性分情况传递；结构体则只需两边保持一样的结构以定义即可传递；</p>
+<p>如果碰到特殊情况怎么办？还可以使用<strong>参数级别</strong>的**[MarshalAs]**特性来指定更细致的数据封送规则。</p>
+<h4 id="MarshalAs"><a href="#MarshalAs" class="headerlink" title="MarshalAs"></a>MarshalAs</h4><p><code>MarshalAs</code> 特性告诉运行时如何在非托管代码和托管代码之间封送特定的参数或返回值。尽管在很多情况下，即使你没有指定 <code>MarshalAs</code> 特性，代码看起来仍然可以正常运行，但是这并不意味着你就可以忽略它。</p>
+<p>使用 <code>MarshalAs</code> 特性有两个主要的理由：</p>
+<ol>
+<li><p><strong>控制数据在托管和非托管之间的表示方式</strong>：C# 和 C++ 数据类型的表示并不总是一一对应的。例如，C# 的 <code>bool</code> 类型在内存中占用 4 字节，而在某些 C++ 编译器中，<code>bool</code> 只占用 1 字节。因此，在这种情况下，就需要使用 <code>[MarshalAs(UnmanagedType.Bool)]</code> 来保证在托管和非托管代码之间正确封送布尔类型。</p>
+</li>
+<li><p><strong>提供更广泛的类型转换支持</strong>：<code>MarshalAs</code> 可以帮助你处理一些自动封送(Marshal)规则无法处理或者需要特殊处理的情况。例如，托管与非托管字符或字符串之间的封送，尤其是在不同的字符编码环境中，或者在封送指针或者引用时，或者多参数采用不同字符封送规则时，这时候 <code>MarshalAs</code> 就非常有用。</p>
+</li>
+</ol>
+<p>总之，在使用PInvoke时，使用 <code>MarshalAs</code> 属性可以提供更明确的控制和更罕见类型的支持，并且可以帮助避免可能发生的问题和错误。</p>
+<h4 id="UmanagedType"><a href="#UmanagedType" class="headerlink" title="UmanagedType"></a>UmanagedType</h4><p><code>MarshalAs</code>需指定一个非托管数据类型<code>UnmanagedType</code>，它 是一个枚举，，它定义了如何在托管代码和非托管代码之间进行数据封送。这是其各个值的概述：</p>
+<ul>
+<li><p><strong>Bool</strong>：在非托管代码中表示为 <code>BOOL</code> 类型（一个字节）。</p>
+</li>
+<li><p><strong>I1</strong>：表示在非托管代码中表示为有符号的 8 位整数。</p>
+</li>
+<li><p><strong>U1</strong>：表示在非托管代码中表示为无符号的 8 位整数。</p>
+</li>
+<li><p><strong>I2</strong>：在非托管代码中表示为有符号的 16 位整数。</p>
+</li>
+<li><p><strong>U2</strong>：在非托管代码中表示为无符号的 16 位整数。</p>
+</li>
+<li><p><strong>I4</strong>：在非托管代码中表示为有符号的 32 位整数。</p>
+</li>
+<li><p><strong>U4</strong>：在非托管代码中表示为无符号的 32 位整数。</p>
+</li>
+<li><p><strong>I8</strong>：在非托管代码中表示为有符号的 64 位整数。</p>
+</li>
+<li><p><strong>Struct</strong>：对象表示为一个非托管结构。</p>
+</li>
+<li><p><strong>Interface</strong>：表示为一个接口。</p>
+</li>
+<li><p><strong>SafeArray</strong>：表示为一个 <code>SAFEARRAY</code>。</p>
+</li>
+<li><p><strong>ByValArray</strong>：表示为一个内联数组。</p>
+</li>
+<li><p><strong>LPStr</strong>：表示在非托管代码中表示为一个指向 ANSI 字符串的指针。</p>
+</li>
+<li><p><strong>LPWStr</strong>：表示在非托管代码中表示为一个指向宽（Unicode）字符串的指针。</p>
+</li>
+<li><p><strong>LPTStr</strong>：表示在非托管代码中表示为一个指向平台-依赖的字符串（根据编译时的字符集选择 ANSI 或 Unicode）的指针。</p>
+</li>
+</ul>
+<p>以上并不全是所有选项，还有其他一些更先进或者具有特殊用途的 <code>UnmanagedType</code> 枚举值。具体信息，你可以查看 <a target="_blank" rel="noopener" href="https://docs.microsoft.com/zh-cn/dotnet/api/system.runtime.interopservices.unmanagedtype">.NET docs</a> 上的相关文档。</p>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><p><a target="_blank" rel="noopener" href="https://github.com/liruoyu2008/PInovke">点我查看</a></p>
+<h3 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h3><p>自从跨平台的.net core问世之后，C++&#x2F;CLI这种无法跨平台的托管C++已经逐渐式微，VS2022的C++默认安装已经不提供其项目或库的模板了，而且，C++&#x2F;CLI的设计初衷是为了使C++编码人员无痛转入.Net阵营，而对于对于我等.Net原著名，目前来说，P&#x2F;Invoke这种历久弥坚的老技术再次成为了事实上的最优解。实际上，P&#x2F;Invoke中还存在很多细节，有我知道但不便继续赘述的，也有我目前还不了解的。欢迎大家留言或提问，一起学习一起成长吧~</p>
 
     </div>
 
@@ -380,7 +437,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A3%B0%E6%98%8E"><span class="nav-number">3.</span> <span class="nav-text">声明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">4.1.</span> <span class="nav-text">结构体</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E6%95%B0%E6%8D%AE"><span class="nav-number">4.2.</span> <span class="nav-text">字符数据</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%90%8E"><span class="nav-number">5.</span> <span class="nav-text">最后</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A3%B0%E6%98%8E"><span class="nav-number">3.</span> <span class="nav-text">声明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.</span> <span class="nav-text">数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E6%9E%84%E4%BD%93"><span class="nav-number">4.1.</span> <span class="nav-text">结构体</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E6%95%B0%E6%8D%AE"><span class="nav-number">4.2.</span> <span class="nav-text">字符数据</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%81%E9%80%81%E8%A7%84%E5%88%99"><span class="nav-number">5.</span> <span class="nav-text">封送规则</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MarshalAs"><span class="nav-number">5.1.</span> <span class="nav-text">MarshalAs</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UmanagedType"><span class="nav-number">5.2.</span> <span class="nav-text">UmanagedType</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="nav-number">6.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E5%90%8E"><span class="nav-number">7.</span> <span class="nav-text">最后</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
